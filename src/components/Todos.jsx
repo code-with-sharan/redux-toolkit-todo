@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { removeTodo, updateTodo } from "../features/todo/todoSlice";
 
 const Todos = () => {
-  const todoArr = useSelector((state) => state.todos);
+  let todoArr = useSelector((state) => state.todos);
   const dispatch = useDispatch();
+
+  const [todoMsg, setTodoMsg] = useState("");
+  const [editableTodoId, setEditableTodoId] = useState(null);
 
   return (
     <>
@@ -15,10 +18,31 @@ const Todos = () => {
             className="mt-4 flex justify-between items-center bg-zinc-800 px-4 py-2 rounded"
             key={todoObj.id}
           >
-            <div className="text-white">{todoObj.text}</div>
+            {editableTodoId === todoObj.id ? (
+              <input
+                type="text"
+                value={todoMsg}
+                className="bg-gray-800 rounded border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-900 text-base outline-none text-gray-100 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                onChange={(e) => setTodoMsg(e.target.value)}
+              />
+            ) : (
+              <div className="text-white">{todoObj.text}</div>
+            )}
+
             <div className="flex gap-4">
-              <button className="text-black bg-green-500 p-1 px-4 rounded-sm">
-                Edit
+              <button
+                className="text-black bg-green-500 p-1 px-4 rounded-sm cursor-pointer"
+                onClick={() => {
+                  if(editableTodoId === todoObj.id){
+                    dispatch(updateTodo({ id: todoObj.id, text: todoMsg }))
+                    setEditableTodoId(null);
+                  } else {
+                    setEditableTodoId(todoObj.id)
+                    setTodoMsg(todoObj.text)
+                  }
+                }}
+              >
+                {editableTodoId === todoObj.id ? "Save" : "Edit"}
               </button>
               <button
                 onClick={() => dispatch(removeTodo(todoObj.id))}
